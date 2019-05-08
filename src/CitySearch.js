@@ -1,21 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Downshift from "downshift";
+import fetchJsonp from "fetch-jsonp";
 
 import "./CitySearch.css";
 
-const items = [
-  { value: "apple" },
-  { value: "pear" },
-  { value: "orange" },
-  { value: "grape" },
-  { value: "banana" }
-];
-
-export default function() {
+export default function({ countryCode, onChange }) {
+  console.log(countryCode);
   return (
     <Downshift
-      onChange={selection => alert(`You selected ${selection.value}`)}
-      itemToString={item => (item ? item.value : "")}
+      // onChange={selection => alert(`You selected ${selection}`)}
+      onChange={onChange}
+      itemToString={item => (item ? item : "")}
     >
       {({
         getInputProps,
@@ -25,20 +20,23 @@ export default function() {
         isOpen,
         inputValue,
         highlightedIndex,
-        selectedItem
+        selectedItem,
+        reset
       }) => (
         <div>
           <input type="hidden" value="prayer" />
           {/* <label {...getLabelProps()}>City</label> */}
-          <input {...getInputProps()} autoComplete="off" />
+          <input {...getInputProps()} name="city" autoComplete="off" />
           <ul {...getMenuProps()} className="suggestions">
             {isOpen ? (
               <CityList
                 {...{
+                  countryCode,
                   inputValue,
                   selectedItem,
                   highlightedIndex,
-                  getItemProps
+                  getItemProps,
+                  reset
                 }}
               />
             ) : null}
@@ -52,35 +50,48 @@ export default function() {
 const searches = {};
 
 function CityList({
+  countryCode,
   inputValue,
   selectedItem,
   highlightedIndex,
-  getItemProps
+  getItemProps,
+  reset
 }) {
+  const [items, setItems] = useState([]);
   useEffect(() => {
-    fetch(
-      `https://secure.geobytes.com/AutoCompleteCity?callback=?&filter=DE&q=ber`
+    if (inputValue.length < 3) {
+      if (items.length > 0) setItems([]);
+      return;
+    }
+    if (searches[inputValue]) {
+      setItems(searches[inputValue]);
+      return;
+    }
+    fetchJsonp(
+      `http://gd.geobytes.com/AutoCompleteCity?filter=${countryCode}&q=${inputValue}`
     )
       .then(r => r.json())
-      .then(console.log);
-  }, [inputValue]);
-  return items
-    .filter(item => !inputValue || item.value.includes(inputValue))
-    .map((item, index) => (
-      <li
-        {...getItemProps({
-          key: item.value,
-          index,
-          item,
-          className: [
-            highlightedIndex === index && "highlighted",
-            selectedItem === item && "selected"
-          ]
-            .filter(Boolean)
-            .join(" ")
-        })}
-      >
-        {item.value}
-      </li>
-    ));
+      .then(response => {
+        searches[inputValue] = response;
+        setItems(response);
+      });
+  }, [inputValue, countryCode, items.length]);
+
+  return items.slice(0, 6).map((item, index) => (
+    <li
+      {...getItemProps({
+        key: item,
+        index,
+        item,
+        className: [
+          highlightedIndex === index && "highlighted",
+          selectedItem === item && "selected"
+        ]
+          .filter(Boolean)
+          .join(" ")
+      })}
+    >
+      {item}
+    </li>
+  ));
 }

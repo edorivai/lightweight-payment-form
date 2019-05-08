@@ -9,7 +9,7 @@ export default function() {
         firstName: "",
         lastName: "",
         address: "",
-        country: "",
+        country: "DE",
         city: "",
         shippingCost: "",
         cardName: "",
@@ -45,14 +45,17 @@ export default function() {
             <li>
               <label>Shipping Information:</label>
               <Field component="select" name="country">
-                <option value="Germany">Germany</option>
-                <option value="Austria">Austria</option>
-                <option value="Spain">Spain</option>
-                <option value="France">France</option>
+                <option value="DE">Germany</option>
+                <option value="AT">Austria</option>
+                <option value="ES">Spain</option>
+                <option value="FR">France</option>
                 <option value="UK">UK</option>
               </Field>
 
-              <CitySearch />
+              <CitySearch
+                countryCode={props.values.country}
+                onChange={city => props.setFieldValue("city", city)}
+              />
 
               {/* <Field
                 placeholder="Shipping cost"
@@ -100,14 +103,13 @@ export default function() {
                   <Field
                     name="agree"
                     type="checkbox"
-                    name="agree"
                     className="checkmark"
                   />
                 </li>
               </ul>
             </li>
             <li>
-              <button onClick={() => this.onSubmit()}>Send</button>
+              <button type="submit">Send</button>
             </li>
           </ul>
         </Form>
