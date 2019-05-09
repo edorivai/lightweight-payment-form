@@ -5,10 +5,8 @@ import fetchJsonp from "fetch-jsonp";
 import "./CitySearch.css";
 
 export default function({ countryCode, onChange }) {
-  console.log(countryCode);
   return (
     <Downshift
-      // onChange={selection => alert(`You selected ${selection}`)}
       onChange={onChange}
       itemToString={item => (item ? item : "")}
     >
@@ -26,7 +24,7 @@ export default function({ countryCode, onChange }) {
         <div>
           <input type="hidden" value="prayer" />
           {/* <label {...getLabelProps()}>City</label> */}
-          <input {...getInputProps()} name="city" autoComplete="off" />
+          <input {...getInputProps()} name="city" placeholder="City" autoComplete="off" />
           <ul {...getMenuProps()} className="suggestions">
             {isOpen ? (
               <CityList

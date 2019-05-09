@@ -1,6 +1,38 @@
 import React from "react";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import CitySearch from "./CitySearch";
+import * as Yup from "yup";
+import creditcard from "card-validator";
+
+import "./Form.css";
+
+const Schema = Yup.object().shape({
+  firstName: Yup.string().required("Required"),
+  lastName: Yup.string().required("Required"),
+  address: Yup.string().required("Required"),
+  country: Yup.string()
+    .uppercase()
+    .length(2)
+    .required("Required"),
+  city: Yup.string().required("Required"),
+  // shippingCost: Yup.string().required('Required'),
+  cardName: Yup.string().required("Required"),
+  cardNumber: Yup.string()
+    .test(
+      "test-number", // this is used internally by yup
+      "Credit Card number is invalid", //validation message
+      value => creditcard.number(value).isValid
+    ) // return true false based on validation
+    .required(),
+  cvv: Yup.string()
+    .test(
+      "test-cvv", // this is used internally by yup
+      "Credit Card CVV is invalid", //validation message
+      value => creditcard.cvv(value).isValid
+    ) // return true false based on validation
+    .required(),
+  agree: Yup.boolean().oneOf([true], "Must Accept Terms and Conditions")
+});
 
 export default function() {
   return (
@@ -11,17 +43,14 @@ export default function() {
         address: "",
         country: "DE",
         city: "",
-        shippingCost: "",
         cardName: "",
         cardNumber: "",
         cvv: "",
-        agree: ""
+        agree: false
       }}
+      validationSchema={Schema}
       onSubmit={(values, actions) => {
-        setTimeout(() => {
-          console.log(JSON.stringify(values, null, 2));
-          actions.setSubmitting(false);
-        }, 1000);
+        console.log(values);
       }}
       render={props => (
         <Form>
@@ -29,10 +58,12 @@ export default function() {
             <li>
               <label>First Name:</label>
               <Field placeholder="First Name" name="firstName" />
+              <ErrorMessage component={StyledError} name="firstName" />
             </li>
             <li>
-              <label for="last-name">Surname:</label>
+              <label>Surname:</label>
               <Field placeholder="Last Name" name="lastName" />
+              <ErrorMessage component={StyledError} name="lastName" />
             </li>
             <li>
               <label>Address:</label>
@@ -41,6 +72,7 @@ export default function() {
                 placeholder="Address"
                 name="address"
               />
+              <ErrorMessage component={StyledError} name="address" />
             </li>
             <li>
               <label>Shipping Information:</label>
@@ -56,6 +88,7 @@ export default function() {
                 countryCode={props.values.country}
                 onChange={city => props.setFieldValue("city", city)}
               />
+              <ErrorMessage component={StyledError} name="city" />
 
               {/* <Field
                 placeholder="Shipping cost"
@@ -63,6 +96,12 @@ export default function() {
                 onChange={e => this.setState({ shippingCost: e.target.value })}
                 className="shipping-cost"
               /> */}
+            </li>
+            <li>
+              <label>Shipping costs</label>
+              <div>
+                {shippingCosts[props.values.country]}
+              </div>
             </li>
             <li style={{ alignItems: "normal" }}>
               <label>Payment method:</label>
@@ -73,6 +112,7 @@ export default function() {
                     name="cardName"
                     style={{ marginLeft: "-40px", width: "36.2rem" }}
                   />
+                  <ErrorMessage component={StyledError} name="cardName" />
                 </li>
                 <li>
                   <Field
@@ -84,7 +124,7 @@ export default function() {
                       width: "31.53rem"
                     }}
                   />
-                  <input
+                  <Field
                     placeholder="CVV"
                     name="cvv"
                     style={{
@@ -94,17 +134,18 @@ export default function() {
                     }}
                   />
                 </li>
+                <li>
+                  <ErrorMessage component={StyledError} name="cardNumber" />
+                  <ErrorMessage component={StyledError} name="cvv" />
+                </li>
               </ul>
             </li>
             <li style={{ alignItems: "normal" }}>
               <p>Agree terms and conditions</p>
               <ul>
                 <li>
-                  <Field
-                    name="agree"
-                    type="checkbox"
-                    className="checkmark"
-                  />
+                  <Field name="agree" type="checkbox" className="checkmark" />
+                  <ErrorMessage component={StyledError} name="agree" />
                 </li>
               </ul>
             </li>
@@ -116,4 +157,16 @@ export default function() {
       )}
     />
   );
+}
+
+const shippingCosts = {
+  DE: "2,50€",
+  AT: "3,00€",
+  ES: "5,45€",
+  FR: "2,00€",
+  UK: "2,75GBP"
+};
+
+function StyledError({ children }) {
+  return <div className="errorMessage">{children}</div>;
 }
