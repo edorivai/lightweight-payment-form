@@ -24,7 +24,7 @@ export default function({ countryCode, onChange }) {
         <div>
           <input type="hidden" value="prayer" />
           {/* <label {...getLabelProps()}>City</label> */}
-          <input {...getInputProps()} name="city" placeholder="City" autoComplete="off" />
+          <input {...getInputProps()} name="city" placeholder="City" autoComplete="blah" />
           <ul {...getMenuProps()} className="suggestions">
             {isOpen ? (
               <CityList
