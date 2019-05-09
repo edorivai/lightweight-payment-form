@@ -34,7 +34,7 @@ const Schema = Yup.object().shape({
   agree: Yup.boolean().oneOf([true], "Must Accept Terms and Conditions")
 });
 
-export default function() {
+export default function({ submit }) {
   return (
     <Formik
       initialValues={{
@@ -51,6 +51,7 @@ export default function() {
       validationSchema={Schema}
       onSubmit={(values, actions) => {
         console.log(values);
+        submit();
       }}
       render={props => (
         <Form>
